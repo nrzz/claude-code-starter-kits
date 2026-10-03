@@ -22,13 +22,16 @@ test("README: the title, then the sections of the family template in order", () 
     "## How it works",
     "## What was verified, and how",
     "## Files",
+    "## Contributing",
+    "## Part of the Claude Code toolkit",
     "## License",
   ]);
 });
 
-test("README: the CI badge sits under the title and links to the workflow", () => {
+test("README: the CI badge leads the badge line under the title and links to the workflow", () => {
   const badge = "[![test](https://github.com/nrzz/claude-code-starter-kits/actions/workflows/test.yml/badge.svg)](https://github.com/nrzz/claude-code-starter-kits/actions/workflows/test.yml)";
-  assert.ok(readme.startsWith(`# Claude Code starter kits\n\n${badge}\n\n`));
+  assert.ok(readme.startsWith(`# Claude Code starter kits\n\n${badge}`));
+  assert.ok(readme.split("\n\n")[1].startsWith(badge) && !readme.split("\n\n")[1].includes("\n"), "one line of badges");
 });
 
 test("README: a two-sentence intro follows the badge", () => {
