@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "{{scriptRules}}"
+    ],
+    "deny": [
+      "Bash(npm publish:*)",
+      "Bash(pnpm publish:*)",
+      "Bash(yarn publish:*)",
+      "Bash(yarn npm publish:*)",
+      "Bash(bun publish:*)"
+    ]
+  }
+}

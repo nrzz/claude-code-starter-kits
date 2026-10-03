@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash({{testRule}}:*)",
+      "Bash({{lintRule}}:*)",
+      "Bash({{formatRule}}:*)"
+    ],
+    "deny": [
+      "Bash(twine upload:*)",
+      "Bash(uv publish:*)",
+      "Bash(poetry publish:*)"
+    ]
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash({{buildRule}}:*)",
+      "Bash({{testRule}}:*)",
+      "Bash({{lintRule}}:*)",
+      "Bash({{formatRule}}:*)"
+    ],
+    "deny": [
+      "Bash(mvn deploy:*)",
+      "Bash(./mvnw deploy:*)",
+      "Bash(gradle publish:*)",
+      "Bash(./gradlew publish:*)"
+    ]
+  }
+}

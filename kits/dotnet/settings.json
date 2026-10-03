@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash({{buildRule}}:*)",
+      "Bash({{testRule}}:*)",
+      "Bash({{lintRule}}:*)",
+      "Bash({{formatRule}}:*)",
+      "Bash(dotnet restore:*)"
+    ],
+    "deny": [
+      "Bash(dotnet nuget push:*)"
+    ]
+  }
+}

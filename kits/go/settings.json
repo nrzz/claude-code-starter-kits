@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash({{buildRule}}:*)",
+      "Bash({{testRule}}:*)",
+      "Bash({{lintRule}}:*)",
+      "Bash({{formatRule}}:*)"
+    ],
+    "deny": [
+      "Bash(goreleaser release:*)"
+    ]
+  }
+}

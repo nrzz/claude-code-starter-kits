@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash({{buildRule}}:*)",
+      "Bash({{testRule}}:*)",
+      "Bash({{lintRule}}:*)",
+      "Bash({{formatRule}}:*)",
+      "Bash(flutter pub get)",
+      "Bash(dart pub get)"
+    ],
+    "deny": [
+      "Bash(flutter pub publish:*)",
+      "Bash(dart pub publish:*)"
+    ]
+  }
+}

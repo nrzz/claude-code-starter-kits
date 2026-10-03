@@ -1,0 +1,46 @@
+{
+  "name": "claude-code-starter-kits",
+  "version": "1.0.0",
+  "description": "One command sets up a lean, safe .claude/ for your project: a short CLAUDE.md with your real commands, permissions, user-only skills and a cheap test-runner subagent. For .NET, Node, Python, Go, Flutter and Java.",
+  "type": "module",
+  "bin": {
+    "claude-starter": "bin/claude-starter.mjs"
+  },
+  "files": [
+    "bin",
+    "src",
+    "kits",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test",
+    "tokens": "node scripts/token-table.mjs --write"
+  },
+  "repository": "github:nrzz/claude-code-starter-kits",
+  "homepage": "https://github.com/nrzz/claude-code-starter-kits#readme",
+  "bugs": "https://github.com/nrzz/claude-code-starter-kits/issues",
+  "keywords": [
+    "claude-code",
+    "claude",
+    "anthropic",
+    "starter",
+    "template",
+    "claude-md",
+    "subagent",
+    "skills",
+    "permissions",
+    "tokens",
+    "dotnet",
+    "node",
+    "python",
+    "go",
+    "flutter",
+    "java"
+  ],
+  "author": "Naresh Prabu",
+  "license": "MIT"
+}
