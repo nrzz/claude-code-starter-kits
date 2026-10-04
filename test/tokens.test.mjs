@@ -44,6 +44,15 @@ test("estimate: a single space between two pieces is free, any other whitespace 
   assert.equal(estimateTokens("a\t"), 2);
 });
 
+test("estimate: a single space is free with a word, a number or punctuation on both sides", () => {
+  assert.equal(estimateTokens("7 8"), 2, "between two numbers");
+  assert.equal(estimateTokens("a 7"), 2, "between a word and a number");
+  assert.equal(estimateTokens("-- a"), 2, "between punctuation and a word");
+  assert.equal(estimateTokens("a : b"), 3, "around punctuation");
+  assert.equal(estimateTokens("a (b)"), 4, "before a parenthesis");
+  assert.equal(estimateTokens("-- ::"), 2, "between two runs of punctuation");
+});
+
 test("estimate: a real line of a template", () => {
   // "-" "Build" "(2)" ":" "`" "dotnet"(2) "build"(2) "MyApp"(2) "." "sln" "`" newline
   assert.equal(estimateTokens("- Build: `dotnet build MyApp.sln`\n"), 1 + 2 + 1 + 1 + 2 + 2 + 2 + 1 + 1 + 1 + 1);

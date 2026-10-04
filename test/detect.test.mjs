@@ -54,6 +54,10 @@ test("java: pom.xml, build.gradle and build.gradle.kts", () => {
   for (const f of ["pom.xml", "build.gradle", "build.gradle.kts"]) assert.equal(detectIn({ [f]: EMPTY }).stack, "java", f);
 });
 
+test("java: a Gradle settings file alone, Groovy or Kotlin, is enough", () => {
+  for (const f of ["settings.gradle", "settings.gradle.kts"]) assert.equal(detectIn({ [f]: EMPTY }).stack, "java", f);
+});
+
 test("nothing recognisable: no stack, no alternatives", () => {
   const d = detectIn({ "README.md": "hello", "notes.txt": "x" });
   assert.equal(d.stack, null);

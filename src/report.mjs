@@ -30,7 +30,7 @@ function describe(a, preview) {
     case "create": return [a.detail, tokens].filter(Boolean).join("; ");
     case "alt": return `${a.because}; Claude Code does not read this name`;
     case "fill": return [preview ? "the existing file is empty" : "the existing file was empty", tokens].filter(Boolean).join("; ");
-    case "append": return [`${a.what} ${added} at the end`, tokens].filter(Boolean).join("; ");
+    case "append": return [`${a.what} ${added} ${a.where ?? "at the end"}`, tokens].filter(Boolean).join("; ");
     case "merge": return `${a.detail} ${added}; ${a.backup ? `backup ${a.backup}` : `the original is backed up first as ${a.path}.bak-starter-<date>-<time>`}`;
     case "skip": return a.reason;
     case "error": return a.message;
@@ -127,6 +127,8 @@ export function formatReport(info) {
 
 /** The stack listing used by --list and by the "nothing detected" message. */
 export function formatStackList(stacks, detectedIds = []) {
-  const width = Math.max(...stacks.map((s) => s.id.length)) + 2;
-  return stacks.map((s) => `  ${pad(s.id, width)}${pad(s.about, 58)}${s.markers}${detectedIds.includes(s.id) ? "   <- found here" : ""}`);
+  // Each column is as wide as its longest entry plus a two-space gap, so no description runs into the markers.
+  const idWidth = Math.max(...stacks.map((s) => s.id.length)) + 2;
+  const aboutWidth = Math.max(...stacks.map((s) => s.about.length)) + 2;
+  return stacks.map((s) => `  ${pad(s.id, idWidth)}${pad(s.about, aboutWidth)}${s.markers}${detectedIds.includes(s.id) ? "   <- found here" : ""}`);
 }

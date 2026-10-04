@@ -96,10 +96,15 @@ function planGitignore(root) {
   const have = new Set(lf(existing ?? "").split("\n").map((l) => l.trim().replace(/^\//, "")));
   const missing = GITIGNORE_LINES.filter((l) => !have.has(l));
   if (!missing.length) return skip(rel, "already ignores both files");
-  const lines = `${have.has(GITIGNORE_HEADER) ? "" : `${GITIGNORE_HEADER}\n`}${missing.join("\n")}\n`;
-  if (!present) return { kind: "create", path: rel, text: lines, detail: `${missing.length} lines` };
+  // What is written: the entries that are missing, under the comment line (only if it is not there yet),
+  // after a blank separator line when the file already has content. The report says so.
+  const comment = !have.has(GITIGNORE_HEADER);
+  const lines = `${comment ? `${GITIGNORE_HEADER}\n` : ""}${missing.join("\n")}\n`;
+  const entries = `${missing.length} ${missing.length === 1 ? "entry" : "entries"}`;
+  const under = comment ? ", under a comment line" : "";
+  if (!present) return { kind: "create", path: rel, text: lines, detail: `${entries}${under}` };
   const lead = !existing.trim() ? "" : existing.endsWith("\n") ? "\n" : "\n\n";
-  return { kind: "append", path: rel, text: withEol(lead + lines, eolOf(existing)), what: `${missing.length} line${missing.length === 1 ? "" : "s"}`, added: missing };
+  return { kind: "append", path: rel, text: withEol(lead + lines, eolOf(existing)), what: entries, where: `at the end${under}`, added: missing };
 }
 
 /**

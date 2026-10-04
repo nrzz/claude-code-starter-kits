@@ -5,6 +5,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { SAMPLES } from "../scripts/samples.mjs";
+import { isSafeName } from "../src/cmd.mjs";
 import { STACKS } from "../src/stacks/index.mjs";
 import { buildTables, currentTables, measureAll, withTables } from "../scripts/token-table.mjs";
 import { ROOT, renderProject } from "./helpers.mjs";
@@ -98,6 +99,46 @@ test("README: the publishing commands, rules and secrets it names are in the kit
     const bare = rule.replace(/^Bash\(|:\*\)$|\)$/g, "").replace(/^Read\(/, "");
     assert.ok(readme.includes(bare.split(" ").slice(0, 2).join(" ")) || readme.includes(bare), `README mentions ${bare}`);
   }
+});
+
+test("README: every fixed allow rule a kit adds beyond the project's own commands is named in the settings.json row", () => {
+  const row = readme.split("\n").find((l) => l.startsWith("| `.claude/settings.json` |"));
+  assert.ok(row, "the settings.json row");
+  const fixed = [];
+  for (const dir of ["_shared", ...STACKS.map((s) => s.id)]) {
+    const { permissions } = JSON.parse(fs.readFileSync(path.join(ROOT, "kits", dir, "settings.json"), "utf8"));
+    for (const rule of permissions.allow) if (!rule.includes("{{")) fixed.push(rule); // a placeholder is one of the project's own commands
+  }
+  assert.deepEqual(fixed.map((r) => r.replace(/^Bash\(|:\*\)$|\)$/g, "")).sort(),
+    ["dart pub get", "dotnet restore", "flutter pub get", "git diff", "git log", "git status"], "these are all the fixed allow rules");
+  for (const rule of fixed) {
+    const command = rule.replace(/^Bash\(|:\*\)$|\)$/g, "");
+    assert.ok(row.includes(`\`${command}\``), `the row names \`${command}\``);
+  }
+});
+
+test("README: the 'Detected from' cell of each stack names every marker file that stack's --list line shows", () => {
+  const expand = (markers) => markers.split(", ").flatMap((m) => (m.endsWith("(.kts)") ? [m.slice(0, -6), `${m.slice(0, -6)}.kts`] : [m]));
+  for (const s of STACKS) {
+    const row = readme.split("\n").find((l) => l.startsWith(`| ${s.label} | \``));
+    assert.ok(row, `${s.label} row`);
+    const cell = row.split(" | ")[1];
+    for (const name of expand(s.markers)) {
+      assert.ok(cell.includes(`\`${name}\``), `${s.label}: the README names ${name}`);
+      assert.equal(s.match([name.replace("*", "App")]).length, 1, `${s.label}: the detector really matches ${name}`);
+    }
+  }
+});
+
+test("README: the characters a folder name may hold for detection are the ones the code accepts", () => {
+  const bullet = readme.split("\n").find((l) => l.startsWith("- **Detection.**"));
+  const listed = /spaces and `([^`]+)`/.exec(bullet)?.[1].split(" ");
+  assert.deepEqual(listed, [".", "_", "@", "/", "+", "~", "=", ",", "-"]);
+  for (const ch of listed) assert.ok(isSafeName(`a${ch}b`), `${ch} is accepted`);
+  assert.ok(isSafeName("my project 2"), "letters, digits and spaces are accepted");
+  const others = [...Array(95).keys()].map((i) => String.fromCharCode(32 + i)).filter((c) => !/[A-Za-z0-9 ]/.test(c) && !listed.includes(c));
+  assert.ok(others.length > 15);
+  for (const ch of others) assert.ok(!isSafeName(`a${ch}b`), `${JSON.stringify(ch)} is refused`);
 });
 
 test("README: the token budget it states is the one enforced", async () => {

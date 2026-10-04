@@ -134,6 +134,13 @@ test("python: flake8 alone gives a lint command and no format", () => {
   assert.equal(v.format, "");
 });
 
+test("python: pytest is the test command even when the project's files never mention it", () => {
+  const v = facts("python", { "requirements.txt": "requests\n" }).vars;
+  assert.equal(v.test, "pytest");
+  assert.equal(v.testOne, "pytest <file>");
+  assert.equal(v.testRule, "pytest");
+});
+
 test("python: no linter at all leaves lint and format empty, and there is never a build", () => {
   const v = facts("python", { "requirements.txt": "requests\n" }).vars;
   assert.equal(v.lint, "");

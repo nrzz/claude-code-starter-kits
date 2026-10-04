@@ -47,8 +47,9 @@ for (const id of STACK_IDS) {
 test("the .gitignore gets the two personal files, with a comment, and nothing else", () => {
   const proj = project(SAMPLES.go.files);
   try {
-    runMain(["--dir", proj.dir]);
+    const r = runMain(["--dir", proj.dir]);
     assert.equal(proj.read(".gitignore"), "# Claude Code: personal files\nCLAUDE.local.md\n.claude/settings.local.json\n");
+    assert.match(r.out, /created\s+\.gitignore\s+2 entries, under a comment line\n/, "the report says two entries under a comment, not two lines (the file has three)");
   } finally { proj.cleanup(); }
 });
 

@@ -15,7 +15,7 @@ const codeFiles = () => ["bin", "src", "scripts", "test"].flatMap(walk).filter((
 
 test("package.json: name, version, type, bin, engines, scripts and the links", () => {
   assert.equal(pkg.name, "claude-code-starter-kits");
-  assert.equal(pkg.version, "1.0.0");
+  assert.equal(pkg.version, "1.0.1");
   assert.equal(pkg.type, "module");
   assert.deepEqual(pkg.bin, { "claude-starter": "bin/claude-starter.mjs" });
   assert.deepEqual(pkg.engines, { node: ">=18" });
@@ -97,11 +97,12 @@ test(".gitattributes keeps LF endings everywhere, and .gitignore ignores node_mo
   assert.match(read(".gitignore"), /^node_modules\/$/m);
 });
 
-test("CI runs npm test on Windows, macOS and Linux with Node 20, 22 and 24", () => {
+test("CI runs npm test on Windows, macOS and Linux with Node 20, 22 and 24, and on Linux with Node 18", () => {
   const wf = read(".github", "workflows", "test.yml");
   assert.match(wf, /^name: test$/m);
   for (const os of ["ubuntu-latest", "windows-latest", "macos-latest"]) assert.ok(wf.includes(os), os);
   assert.match(wf, /node: \[20, 22, 24\]/);
+  assert.match(wf, /- os: ubuntu-latest\s+node: 18\b/, "Node 18 is one more job, on Linux");
   assert.match(wf, /- run: npm test/);
 });
 

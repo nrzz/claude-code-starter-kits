@@ -332,7 +332,7 @@ test("an existing .gitignore only gets lines added at the end, once", () => {
   try {
     const r = runMain(["--dir", proj.dir]);
     assert.equal(proj.read(".gitignore"), `${mine}\n# Claude Code: personal files\nCLAUDE.local.md\n.claude/settings.local.json\n`);
-    assert.match(r.out, /merged\s+\.gitignore\s+2 lines added at the end/);
+    assert.match(r.out, /merged\s+\.gitignore\s+2 entries added at the end, under a comment line/, "the report counts the two entries and mentions the comment, not '2 lines'");
     const again = runMain(["--dir", proj.dir]);
     assert.equal(count(proj.read(".gitignore"), "CLAUDE.local.md"), 1);
     assert.match(again.out, /skipped\s+\.gitignore\s+already ignores both files/);
@@ -362,7 +362,7 @@ test(".gitignore: when one of the two is there, only the other is added, and the
   try {
     const r = runMain(["--dir", proj.dir]);
     assert.equal(proj.read(".gitignore"), "# Claude Code: personal files\nCLAUDE.local.md\n\n.claude/settings.local.json\n");
-    assert.match(r.out, /1 line added at the end/);
+    assert.match(r.out, /merged\s+\.gitignore\s+1 entry added at the end(?!, under)/, "no comment line is added this time, so the report does not mention one");
   } finally { proj.cleanup(); }
 });
 
@@ -419,7 +419,7 @@ test("a preview speaks in the conditional: would go, would be added", () => {
     const r = runMain(["--dir", proj.dir, "--dry-run"]);
     assert.match(r.out, /CLAUDE\.md already exists, so the starter would go to CLAUDE\.starter\.md/);
     assert.match(r.out, /would merge\s+\.claude\/settings\.json\s+\+\d+ rules would be added/);
-    assert.match(r.out, /would merge\s+\.gitignore\s+2 lines would be added at the end/);
+    assert.match(r.out, /would merge\s+\.gitignore\s+2 entries would be added at the end, under a comment line/);
     assert.doesNotMatch(r.out, /Review the files, then commit/);
     const merged = runMain(["--dir", proj.dir, "--dry-run", "--merge"]);
     assert.match(merged.out, /would merge\s+CLAUDE\.md\s+starter section would be added at the end/);

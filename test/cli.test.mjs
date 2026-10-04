@@ -5,7 +5,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { SAMPLES } from "../scripts/samples.mjs";
 import { parseArgs, version } from "../src/cli.mjs";
-import { STACK_IDS } from "../src/stacks/index.mjs";
+import { formatStackList } from "../src/report.mjs";
+import { STACKS, STACK_IDS } from "../src/stacks/index.mjs";
 import { ROOT, project, rmrf, runBin, snapshot, tmp, tree } from "./helpers.mjs";
 
 const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf8"));
@@ -33,7 +34,7 @@ test("--version and -v print the package version", () => {
     assert.equal(r.code, 0);
     assert.equal(r.out.trim(), pkg.version);
   }
-  assert.equal(pkg.version, "1.0.0");
+  assert.equal(pkg.version, "1.0.1");
   assert.equal(version(), pkg.version);
 });
 
@@ -96,13 +97,45 @@ test("--list names the six stacks with what each is detected from, and marks wha
   } finally { proj.cleanup(); }
 });
 
+test("--list: every description is padded to the longest one, so none runs into the file names after it", () => {
+  const proj = project(SAMPLES.node.files);
+  try {
+    const r = runBin(["--list"], { cwd: proj.dir });
+    assert.equal(r.code, 0);
+    assert.doesNotMatch(r.out, /Expresspackage/, "Node's description is the longest, and used to touch its markers");
+    const lines = r.out.split("\n");
+    const columns = new Set();
+    for (const s of STACKS) {
+      const line = lines.find((l) => l.startsWith(`  ${s.id} `));
+      assert.ok(line, `${s.id} has a line`);
+      const aboutEnd = line.indexOf(s.about) + s.about.length;
+      const markersAt = line.indexOf(s.markers, aboutEnd);
+      assert.ok(markersAt >= aboutEnd + 2, `${s.id}: two spaces at least between the description and ${s.markers}`);
+      assert.match(line.slice(aboutEnd, markersAt), /^ +$/, `${s.id}: only padding in between`);
+      columns.add(markersAt);
+    }
+    assert.equal(columns.size, 1, "the markers start in one column");
+  } finally { proj.cleanup(); }
+});
+
+test("formatStackList: the description column is as wide as the longest description, whatever its length", () => {
+  const stacks = [
+    { id: "a", about: "x".repeat(80), markers: "one.json" },
+    { id: "bb", about: "short", markers: "two.json" },
+  ];
+  assert.deepEqual(formatStackList(stacks, ["bb"]), [
+    `  a   ${"x".repeat(80)}  one.json`,
+    `  bb  short${" ".repeat(77)}two.json   <- found here`,
+  ]);
+});
+
 test("a real run through the bin: files written, exit 0, summary on stdout, nothing on stderr", () => {
   const proj = project(SAMPLES.dotnet.files);
   try {
     const r = runBin([], { cwd: proj.dir });
     assert.equal(r.code, 0, r.err);
     assert.equal(r.err, "");
-    assert.match(r.out, /^claude-starter 1\.0\.0\n/);
+    assert.match(r.out, /^claude-starter 1\.0\.1\n/);
     assert.match(r.out, /created\s+CLAUDE\.md/);
     for (const f of [".claude/settings.json", ".claude/skills/test/SKILL.md", ".claude/skills/check/SKILL.md", ".claude/agents/test-runner.md", ".gitignore"]) assert.ok(proj.has(f), f);
     const again = runBin([], { cwd: proj.dir });

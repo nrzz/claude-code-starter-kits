@@ -1,6 +1,6 @@
 {
   "name": "claude-code-starter-kits",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "One command sets up a lean, safe .claude/ for your project: a short CLAUDE.md with your real commands, permissions, user-only skills and a cheap test-runner subagent. For .NET, Node, Python, Go, Flutter and Java.",
   "type": "module",
   "bin": {
