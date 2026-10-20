@@ -4,6 +4,7 @@ import { gatherFacts } from "../src/facts.mjs";
 import { artifactId, gradleRootName } from "../src/stacks/java.mjs";
 import { moduleName } from "../src/stacks/go.mjs";
 import { pythonTool } from "../src/stacks/python.mjs";
+import { crateName, workspaceMembers } from "../src/stacks/rust.mjs";
 import { tomlHasTable, tomlString } from "../src/stacks/util.mjs";
 import { project } from "./helpers.mjs";
 
@@ -294,6 +295,54 @@ test("java: the Gradle root project name", () => {
   const proj = project({ "settings.gradle.kts": 'rootProject.name = "shop"\n' });
   try { assert.equal(gradleRootName(proj.dir), "shop"); } finally { proj.cleanup(); }
   assert.equal(facts("java", { "build.gradle": "", "settings.gradle": "rootProject.name = 'store'\n" }).vars.name, "store");
+});
+
+// ----------------------------------------------------------------------------------------------- rust
+
+test("rust: single package with standard cargo commands", () => {
+  const v = facts("rust", { "Cargo.toml": '[package]\nname = "my-tool"\nversion = "0.1.0"\n' }).vars;
+  assert.equal(v.name, "my-tool");
+  assert.equal(v.build, "cargo build");
+  assert.equal(v.test, "cargo test");
+  assert.equal(v.testOne, "cargo test <test>");
+  assert.equal(v.lint, "cargo clippy --all-targets -- -D warnings");
+  assert.equal(v.format, "cargo fmt --check");
+  assert.equal(v.buildRule, "cargo build");
+  assert.equal(v.testRule, "cargo test");
+  assert.equal(v.lintRule, "cargo clippy");
+  assert.equal(v.formatRule, "cargo fmt");
+});
+
+test("rust: crateName parses package name", () => {
+  assert.equal(crateName('[package]\nname = "my-crate"\n'), "my-crate");
+  assert.equal(crateName('[workspace]\n'), null);
+});
+
+test("rust: workspace with members", () => {
+  const toml = '[workspace]\nmembers = [\n  "crates/core",\n  "crates/cli"\n]\n';
+  const f = facts("rust", { "Cargo.toml": toml });
+  assert.equal(f.summary, "workspace (2 members)");
+  assert.deepEqual(workspaceMembers(toml), ["crates/core", "crates/cli"]);
+});
+
+test("rust: workspace with single member", () => {
+  const toml = '[workspace]\nmembers = ["crates/*"]\n';
+  const f = facts("rust", { "Cargo.toml": toml });
+  assert.equal(f.summary, "workspace (1 member)");
+});
+
+test("rust: workspace without members", () => {
+  const toml = "[workspace]\n";
+  const f = facts("rust", { "Cargo.toml": toml });
+  assert.equal(f.summary, "workspace");
+  assert.deepEqual(workspaceMembers(toml), []);
+});
+
+test("rust: run is `cargo run` when binary target exists, else nothing", () => {
+  assert.equal(facts("rust", { "Cargo.toml": '[package]\nname = "x"\n', "src/main.rs": "fn main() {}\n" }).vars.run, "cargo run");
+  assert.equal(facts("rust", { "Cargo.toml": '[package]\nname = "x"\n[[bin]]\nname = "x"\n' }).vars.run, "cargo run");
+  assert.equal(facts("rust", { "Cargo.toml": '[package]\nname = "x"\n', "src/bin/tool.rs": "fn main() {}\n" }).vars.run, "cargo run");
+  assert.equal(facts("rust", { "Cargo.toml": '[package]\nname = "x"\n', "src/lib.rs": "pub fn x() {}\n" }).vars.run, "");
 });
 
 test("summaries: dotnet says which solution it chose, and nothing when there is no choice", () => {

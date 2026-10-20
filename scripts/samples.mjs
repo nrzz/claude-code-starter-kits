@@ -58,6 +58,14 @@ export const SAMPLES = {
       mvnw: "#!/bin/sh\n",
     },
   },
+  rust: {
+    about: "a Cargo package with a binary and tests",
+    files: {
+      "Cargo.toml": '[package]\nname = "my-app"\nversion = "0.1.0"\nedition = "2021"\n',
+      "src/main.rs": "fn main() {}\n",
+      "tests/app_test.rs": "#[test]\nfn test_app() {}\n",
+    },
+  },
 };
 
 /** Write the sample project for `stackId` into `dir`. */

@@ -5,20 +5,22 @@ import python from "./python.mjs";
 import go from "./go.mjs";
 import flutter from "./flutter.mjs";
 import java from "./java.mjs";
+import rust from "./rust.mjs";
 
-export const STACKS = [dotnet, node, python, go, flutter, java];
+export const STACKS = [dotnet, node, python, go, flutter, java, rust];
 export const STACK_IDS = STACKS.map((s) => s.id);
 export const stackById = (id) => STACKS.find((s) => s.id === id) ?? null;
 
 // When two stacks have a marker in the same folder, the first of these wins. package.json comes last
 // because many projects that are not Node projects have one just for tooling (prettier, commitlint, ...).
-export const TIE_ORDER = ["dotnet", "java", "go", "flutter", "python", "node"];
+export const TIE_ORDER = ["dotnet", "rust", "java", "go", "flutter", "python", "node"];
 
 // Other names people type for a stack.
 const ALIASES = {
   csharp: "dotnet", "c#": "dotnet", ".net": "dotnet",
   js: "node", ts: "node", javascript: "node", typescript: "node", nodejs: "node", npm: "node",
   py: "python", golang: "go", dart: "flutter",
+  cargo: "rust", rs: "rust",
 };
 
 /** A stack id from what the user typed, or null. */

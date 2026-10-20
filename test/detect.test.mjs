@@ -12,8 +12,8 @@ function detectIn(files, named = null) {
 
 const EMPTY = "";
 
-test("stacks: the six kits", () => {
-  assert.deepEqual(STACK_IDS, ["dotnet", "node", "python", "go", "flutter", "java"]);
+test("stacks: the seven kits", () => {
+  assert.deepEqual(STACK_IDS, ["dotnet", "node", "python", "go", "flutter", "java", "rust"]);
 });
 
 test("dotnet: a .sln file", () => {
@@ -56,6 +56,10 @@ test("java: pom.xml, build.gradle and build.gradle.kts", () => {
 
 test("java: a Gradle settings file alone, Groovy or Kotlin, is enough", () => {
   for (const f of ["settings.gradle", "settings.gradle.kts"]) assert.equal(detectIn({ [f]: EMPTY }).stack, "java", f);
+});
+
+test("rust: Cargo.toml", () => {
+  assert.equal(detectIn({ "Cargo.toml": '[package]\nname = "x"\n' }).stack, "rust");
 });
 
 test("nothing recognisable: no stack, no alternatives", () => {
@@ -106,19 +110,19 @@ test("mixed: a deeper project loses to a shallower one of another stack", () => 
   assert.deepEqual(d.alternatives.map((a) => a.stack), ["node"]);
 });
 
-test("mixed, same folder: dotnet, java, go, flutter and python all beat package.json", () => {
-  for (const [marker, stack] of [["App.sln", "dotnet"], ["pom.xml", "java"], ["go.mod", "go"], ["pubspec.yaml", "flutter"], ["pyproject.toml", "python"]]) {
+test("mixed, same folder: dotnet, rust, java, go, flutter and python all beat package.json", () => {
+  for (const [marker, stack] of [["App.sln", "dotnet"], ["Cargo.toml", "rust"], ["pom.xml", "java"], ["go.mod", "go"], ["pubspec.yaml", "flutter"], ["pyproject.toml", "python"]]) {
     const d = detectIn({ "package.json": "{}", [marker]: EMPTY });
     assert.equal(d.stack, stack, marker);
     assert.deepEqual(d.alternatives.map((a) => a.stack), ["node"], marker);
   }
 });
 
-test("mixed, same folder: the tie order is dotnet, java, go, flutter, python, node", () => {
-  const all = { "App.sln": EMPTY, "pom.xml": EMPTY, "go.mod": "m", "pubspec.yaml": "n", "pyproject.toml": EMPTY, "package.json": "{}" };
+test("mixed, same folder: the tie order is dotnet, rust, java, go, flutter, python, node", () => {
+  const all = { "App.sln": EMPTY, "Cargo.toml": EMPTY, "pom.xml": EMPTY, "go.mod": "m", "pubspec.yaml": "n", "pyproject.toml": EMPTY, "package.json": "{}" };
   const d = detectIn(all);
   assert.equal(d.stack, "dotnet");
-  assert.deepEqual(d.alternatives.map((a) => a.stack), ["java", "go", "flutter", "python", "node"]);
+  assert.deepEqual(d.alternatives.map((a) => a.stack), ["rust", "java", "go", "flutter", "python", "node"]);
 });
 
 test("mixed: the same stack found twice is never an alternative", () => {
@@ -167,9 +171,9 @@ test("naming a stack with no project files: the root, with defaults", () => {
 
 test("stack names and their aliases", () => {
   for (const id of STACK_IDS) assert.equal(resolveStackName(id), id);
-  const aliases = { ts: "node", typescript: "node", js: "node", javascript: "node", nodejs: "node", csharp: "dotnet", ".NET": "dotnet", golang: "go", py: "python", dart: "flutter", " Python ": "python", NODE: "node" };
+  const aliases = { ts: "node", typescript: "node", js: "node", javascript: "node", nodejs: "node", csharp: "dotnet", ".NET": "dotnet", golang: "go", py: "python", dart: "flutter", " Python ": "python", NODE: "node", cargo: "rust", rs: "rust" };
   for (const [alias, id] of Object.entries(aliases)) assert.equal(resolveStackName(alias), id, alias);
-  for (const bad of ["rust", "", "list", null, undefined]) assert.equal(resolveStackName(bad), null, String(bad));
+  for (const bad of ["ruby", "", "list", null, undefined]) assert.equal(resolveStackName(bad), null, String(bad));
 });
 
 test("scan: closest to the root first, folders in name order", () => {
