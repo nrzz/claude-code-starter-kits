@@ -15,7 +15,7 @@ const codeFiles = () => ["bin", "src", "scripts", "test"].flatMap(walk).filter((
 
 test("package.json: name, version, type, bin, engines, scripts and the links", () => {
   assert.equal(pkg.name, "claude-code-starter-kits");
-  assert.equal(pkg.version, "1.0.1");
+  assert.equal(pkg.version, "1.1.0");
   assert.equal(pkg.type, "module");
   assert.deepEqual(pkg.bin, { "claude-starter": "bin/claude-starter.mjs" });
   assert.deepEqual(pkg.engines, { node: ">=18" });

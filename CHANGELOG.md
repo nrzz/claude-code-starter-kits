@@ -2,6 +2,12 @@
 
 All notable changes to Claude Code starter kits are written here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+## [1.1.0] - 2026-10-29
+
+- Added: a Rust kit. A `Cargo.toml` is detected (and a `[workspace]`, whose member count shows in the preview), and the kit fills in `cargo build`, `cargo test`, `cargo clippy --all-targets -- -D warnings` and `cargo fmt --check`, allows those, denies `cargo publish`, and stays under the token budget (242 tokens). Thanks to [@yoreva-01](https://github.com/yoreva-01) in [#4](https://github.com/nrzz/claude-code-starter-kits/pull/4).
+
 ## [1.0.1] - 2026-10-04
 
 - Fixed: `--list` printed Node's description running into its file names ("...Expresspackage.json"); every column is now as wide as its longest entry.
@@ -12,5 +18,6 @@ All notable changes to Claude Code starter kits are written here. The format fol
 
 - First release: kits for .NET, Node, Python, Go, Flutter and Java with a CLAUDE.md under 250 tokens, permission rules, user-only `/test` and `/check` skills and a Haiku test-runner subagent; nothing is ever overwritten.
 
+[1.1.0]: https://github.com/nrzz/claude-code-starter-kits/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/nrzz/claude-code-starter-kits/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/nrzz/claude-code-starter-kits/releases/tag/v1.0.0

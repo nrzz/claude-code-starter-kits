@@ -34,7 +34,7 @@ test("--version and -v print the package version", () => {
     assert.equal(r.code, 0);
     assert.equal(r.out.trim(), pkg.version);
   }
-  assert.equal(pkg.version, "1.0.1");
+  assert.equal(pkg.version, "1.1.0");
   assert.equal(version(), pkg.version);
 });
 
@@ -135,7 +135,7 @@ test("a real run through the bin: files written, exit 0, summary on stdout, noth
     const r = runBin([], { cwd: proj.dir });
     assert.equal(r.code, 0, r.err);
     assert.equal(r.err, "");
-    assert.match(r.out, /^claude-starter 1\.0\.1\n/);
+    assert.match(r.out, /^claude-starter 1\.1\.0\n/);
     assert.match(r.out, /created\s+CLAUDE\.md/);
     for (const f of [".claude/settings.json", ".claude/skills/test/SKILL.md", ".claude/skills/check/SKILL.md", ".claude/agents/test-runner.md", ".gitignore"]) assert.ok(proj.has(f), f);
     const again = runBin([], { cwd: proj.dir });
