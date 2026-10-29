@@ -325,10 +325,26 @@ test("rust: workspace with members", () => {
   assert.deepEqual(workspaceMembers(toml), ["crates/core", "crates/cli"]);
 });
 
-test("rust: workspace with single member", () => {
-  const toml = '[workspace]\nmembers = ["crates/*"]\n';
-  const f = facts("rust", { "Cargo.toml": toml });
+test("rust: workspace members containing the letter n are read whole", () => {
+  const toml = '[workspace]\nmembers = ["engine", "cli", "runner"]\n';
+  assert.deepEqual(workspaceMembers(toml), ["engine", "cli", "runner"]);
+  assert.equal(facts("rust", { "Cargo.toml": toml }).summary, "workspace (3 members)");
+  const nested = '[workspace]\nmembers = ["crates/engine", "crates/cli", "crates/runner"]\n';
+  assert.deepEqual(workspaceMembers(nested), ["crates/engine", "crates/cli", "crates/runner"]);
+  assert.equal(facts("rust", { "Cargo.toml": nested }).summary, "workspace (3 members)");
+  assert.deepEqual(workspaceMembers('[workspace]\r\nmembers = [\r\n  "engine",\r\n  "net"\r\n]\r\n'), ["engine", "net"]);
+});
+
+test("rust: workspace with a single member", () => {
+  const f = facts("rust", { "Cargo.toml": '[workspace]\nmembers = ["crates/core"]\n' });
   assert.equal(f.summary, "workspace (1 member)");
+});
+
+test("rust: a glob member leaves the count out, since it stands for many folders", () => {
+  const toml = '[workspace]\nmembers = ["crates/*"]\n';
+  assert.deepEqual(workspaceMembers(toml), ["crates/*"]);
+  assert.equal(facts("rust", { "Cargo.toml": toml }).summary, "workspace");
+  assert.equal(facts("rust", { "Cargo.toml": '[workspace]\nmembers = ["app", "crates/*"]\n' }).summary, "workspace");
 });
 
 test("rust: workspace without members", () => {

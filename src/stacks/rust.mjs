@@ -19,7 +19,7 @@ export function workspaceMembers(cargoToml) {
   const m = /^[ \t]*members[ \t]*=[ \t]*\[([\s\S]*?)\]/m.exec(body);
   if (!m) return [];
   const items = [];
-  const re = /["']([^"'\\n]+)["']/g;
+  const re = /["']([^"'\r\n]+)["']/g;
   let match;
   while ((match = re.exec(m[1])) !== null) {
     items.push(match[1]);
@@ -50,7 +50,7 @@ export default {
     return {
       name,
       summary: isWorkspace
-        ? members.length > 0
+        ? members.length > 0 && !members.some((m) => /[*?]/.test(m)) // a glob stands for many folders: no count
           ? members.length === 1
             ? "workspace (1 member)"
             : `workspace (${members.length} members)`
