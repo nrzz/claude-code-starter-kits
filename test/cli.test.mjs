@@ -54,9 +54,9 @@ test("two stacks, or an unknown one, exit 1 and name the choices", () => {
   const two = runBin(["go", "node"]);
   assert.equal(two.code, 1);
   assert.match(two.err, /one stack at a time \(got "go" and "node"\)/);
-  const unknown = runBin(["rust"]);
+  const unknown = runBin(["ruby"]);
   assert.equal(unknown.code, 1);
-  assert.match(unknown.err, /unknown stack "rust"/);
+  assert.match(unknown.err, /unknown stack "ruby"/);
   for (const id of STACK_IDS) assert.ok(unknown.err.includes(id), id);
 });
 
@@ -82,7 +82,7 @@ test("--dir=<path> works like --dir <path>", () => {
   } finally { proj.cleanup(); }
 });
 
-test("--list names the six stacks with what each is detected from, and marks what is found here", () => {
+test("--list names the seven stacks with what each is detected from, and marks what is found here", () => {
   const proj = project({ ...SAMPLES.go.files });
   try {
     const before = snapshot(proj.dir);

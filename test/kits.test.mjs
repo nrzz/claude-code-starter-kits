@@ -29,6 +29,7 @@ const RICH = {
   go: ["build", "test", "testOne", "lint", "format"],
   flutter: ["build", "test", "testOne", "lint", "format"],
   java: ["build", "test", "testOne", "lint", "format"],
+  rust: ["build", "test", "testOne", "lint", "format"],
 };
 
 const conventions = (md) => {
@@ -92,6 +93,7 @@ const BARE = {
   go: { "go.mod": "module x\n" },
   flutter: { "pubspec.yaml": "name: x\n" },
   java: { "pom.xml": "<project/>" },
+  rust: { "Cargo.toml": '[package]\nname = "x"\n' },
 };
 
 for (const id of STACK_IDS) {
@@ -142,7 +144,7 @@ test("budget: python with poetry and a long project name, java with Spring Boot 
 
 test("skills: both are user-only, short and well formed on every stack, rich or bare", () => {
   const kits = [...Object.values(SAMPLE_KITS).map((k) => k.kit), ...Object.values(BARE).map((f) => renderProject(f).kit)];
-  assert.equal(kits.length, 12);
+  assert.equal(kits.length, 14);
   for (const kit of kits) {
     for (const name of ["test", "check"]) {
       const f = kit.files.find((x) => x.path === `.claude/skills/${name}/SKILL.md`);

@@ -2,7 +2,7 @@
 
 [![test](https://github.com/nrzz/claude-code-starter-kits/actions/workflows/test.yml/badge.svg)](https://github.com/nrzz/claude-code-starter-kits/actions/workflows/test.yml) [![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) ![node >= 18](https://img.shields.io/badge/node-%3E%3D18-339933.svg) ![dependencies: none](https://img.shields.io/badge/dependencies-none-brightgreen.svg) [![part of the Claude Code toolkit](https://img.shields.io/badge/Claude%20Code-toolkit-d97757.svg)](https://github.com/nrzz/claude-code-toolkit)
 
-One command sets up a lean, safe `.claude/` for your project: a short `CLAUDE.md` with your real commands, permissions that skip the prompts you would approve anyway and block the ones you never should, two user-only skills, and a cheap test-runner subagent. It detects .NET, Node.js, Python, Go, Flutter and Java projects, never replaces a file you already have, and tells you what the files cost in tokens before you commit them.
+One command sets up a lean, safe `.claude/` for your project: a short `CLAUDE.md` with your real commands, permissions that skip the prompts you would approve anyway and block the ones you never should, two user-only skills, and a cheap test-runner subagent. It detects .NET, Node.js, Python, Go, Flutter, Java and Rust projects, never replaces a file you already have, and tells you what the files cost in tokens before you commit them.
 
 ## What it costs in tokens
 
@@ -19,6 +19,7 @@ In every session (estimated tokens):
 | Go | 196 | 36 | **232** | 0 |
 | Flutter | 207 | 36 | **243** | 0 |
 | Java | 211 | 36 | **247** | 0 |
+| Rust | 206 | 36 | **242** | 0 |
 
 Only when you use it (estimated tokens; each is a one-off, not a per-turn cost):
 
@@ -30,8 +31,9 @@ Only when you use it (estimated tokens; each is a one-off, not a per-turn cost):
 | Go | 99 | 84 | 148 |
 | Flutter | 96 | 86 | 146 |
 | Java | 98 | 89 | 152 |
+| Rust | 96 | 95 | 155 |
 
-Measured on a sample project per stack with every command present, so they are close to the most a typical project costs; a long solution or project name adds a few tokens. Samples: .NET: a solution with a web project and a test project; Node.js: a TypeScript Next.js app with pnpm and every script; Python: a Django project with uv, ruff and pytest; Go: a module with a main package and golangci-lint; Flutter: a Flutter app with an Android folder; Java: a Spring Boot app built with the Maven wrapper and Spotless.
+Measured on a sample project per stack with every command present, so they are close to the most a typical project costs; a long solution or project name adds a few tokens. Samples: .NET: a solution with a web project and a test project; Node.js: a TypeScript Next.js app with pnpm and every script; Python: a Django project with uv, ruff and pytest; Go: a module with a main package and golangci-lint; Flutter: a Flutter app with an Android folder; Java: a Spring Boot app built with the Maven wrapper and Spotless; Rust: a Cargo package with a binary and tests.
 <!-- token-table:end -->
 
 `CLAUDE.md` is the one file with a budget: under 250 tokens for every stack, enforced by a test on the sample above and on awkward cases (long names, a project in a sub-folder, every package manager). A long solution or project name is repeated in several commands and adds tokens, so the command warns when a generated `CLAUDE.md` goes over.
@@ -51,7 +53,7 @@ The first shows every file and merge it would make and writes nothing. The secon
 
 | Option | What it does |
 | --- | --- |
-| `[stack]` | `dotnet`, `node`, `python`, `go`, `flutter` or `java`. Left out, the stack is detected from your files. Also accepted: `csharp`, `ts`, `typescript`, `js`, `javascript`, `nodejs`, `py`, `golang`, `dart`. |
+| `[stack]` | `dotnet`, `node`, `python`, `go`, `flutter`, `java` or `rust`. Left out, the stack is detected from your files. Also accepted: `csharp`, `ts`, `typescript`, `js`, `javascript`, `nodejs`, `py`, `golang`, `dart`, `cargo`, `rs`. |
 | `--dir <path>` | The project folder. Default: the current folder. |
 | `--dry-run` | Show every file and merge that would happen. Writes nothing. |
 | `--print` | Like `--dry-run`, and print the content of every file (for a merge, the rules that would be added). |
@@ -106,6 +108,7 @@ What changes per stack:
 | Go | `go.mod` | `go build ./...`, `go test ./...`, `go test ./<pkg> -run <Test>`, `gofmt -w .`, and `golangci-lint run` if the project has a config for it, else `go vet ./...` | `go build`, `go test`, `go vet` or `golangci-lint run`, `gofmt` | `goreleaser release` |
 | Flutter | `pubspec.yaml` | `flutter test`, `flutter analyze`, `dart format .`, and `flutter build apk`, `web` or `ios` by the platform folders; a Dart package without the Flutter SDK gets `dart test` and `dart analyze` | `flutter` or `dart` `test`, `analyze`, `format`, `flutter build`, `flutter pub get`, `dart pub get` | `flutter pub publish`, `dart pub publish` |
 | Java | `pom.xml`, `build.gradle`, `build.gradle.kts`, `settings.gradle`, `settings.gradle.kts` | `./mvnw` or `mvn` (Maven), `./gradlew` or `gradle` (Gradle), by whether the wrapper is there; `package -DskipTests` or `build -x test`, `test`, test one by class; Spotless or Checkstyle only if the build file names it. A note for Spring Boot | The build, test, lint and format commands it found | `mvn deploy`, `./mvnw deploy`, `gradle publish`, `./gradlew publish` |
+| Rust | `Cargo.toml` | `cargo build`, `cargo test`, test one by test name, `cargo clippy --all-targets -- -D warnings`, `cargo fmt --check` | `cargo build`, `cargo test`, `cargo clippy`, `cargo fmt` | `cargo publish` |
 
 Every stack also denies `Read(./.env)`, `Read(./.env.*)`, `Read(./**/*.pem)`, `Read(./secrets/**)`, `git push --force` and `git push -f`.
 
@@ -127,7 +130,7 @@ Run it again at any time: a second run changes nothing.
 
 ## How it works
 
-- **Detection.** It looks for marker files in the project folder and three levels below it, skipping dot-folders, `node_modules`, `bin`, `obj`, `dist`, `build`, `target`, `vendor`, `venv` and similar, and any folder whose name contains anything but letters and digits (in any script), spaces and `. _ @ / + ~ = , -`, because a folder's name can end up in `CLAUDE.md`. The match closest to the root wins. In the same folder the order is .NET, Java, Go, Flutter, Python, Node.js, because many projects that are not Node projects have a `package.json` only for tooling. The other stacks it found are listed, with the command to use one instead, and a Flutter or Node project's `android/` Gradle build is not offered as a second project. If nothing matches, it lists the stacks and exits 1. A project found in a sub-folder gets its kit at the project root, and `CLAUDE.md` says where the commands run.
+- **Detection.** It looks for marker files in the project folder and three levels below it, skipping dot-folders, `node_modules`, `bin`, `obj`, `dist`, `build`, `target`, `vendor`, `venv` and similar, and any folder whose name contains anything but letters and digits (in any script), spaces and `. _ @ / + ~ = , -`, because a folder's name can end up in `CLAUDE.md`. The match closest to the root wins. In the same folder the order is .NET, Rust, Java, Go, Flutter, Python, Node.js, because many projects that are not Node projects have a `package.json` only for tooling. The other stacks it found are listed, with the command to use one instead, and a Flutter or Node project's `android/` Gradle build is not offered as a second project. If nothing matches, it lists the stacks and exits 1. A project found in a sub-folder gets its kit at the project root, and `CLAUDE.md` says where the commands run.
 - **Commands.** Each stack module reads the project's own files: the `scripts` of `package.json` and the lockfile for the package manager, the solution file name, `uv.lock` or `[tool.poetry]`, `golangci` config, `mvnw` and `gradlew`, plugin names in `pom.xml` and `build.gradle`. Node commands come only from the `scripts` of `package.json`, and a script the project does not have is left out. The other stacks fill in their standard toolchain commands (`dotnet build`, `pytest`, `go test`, `flutter test`, `mvn` or `gradlew`) whether or not the project's files mention them. Linters and formatters that are not part of the toolchain itself (ruff, black, flake8, golangci-lint, Spotless, Checkstyle) are added only when the project's files name them. Names that come from project files are cleaned to plain characters before they reach a file Claude reads in every session.
 - **Templates.** The kits are plain files under `kits/<stack>/` and `kits/_shared/` with `{{placeholders}}`. A line whose placeholder is empty is dropped, and so is a heading left with nothing under it. A placeholder that is not defined stops rendering with an error that names the file, so a typo cannot silently drop a line.
 - **Plan, then apply.** Every decision (create, skip, merge, write an alternative file) is made first, without writing. `--dry-run` and `--print` stop there, so they show exactly what a real run does. New files are created with an exclusive flag, so a file that appears in between is never overwritten.
@@ -137,7 +140,7 @@ Run it again at any time: a second run changes nothing.
 
 Checked on 2026-10-04 on Windows 11 with Node 24.19. The workflow in `.github/workflows/test.yml` runs the same tests on Windows, macOS and Linux with Node 20, 22 and 24, and on Linux with Node 18.
 
-- **Over 250 automated tests** (`npm test`), all running in throwaway folders under the OS temp folder. The command is run with `HOME`, `USERPROFILE` and `CLAUDE_CONFIG_DIR` pointed at another throwaway folder, and runs inside the test process are given a fake home, so no test reads or writes a real Claude config. They cover detection of each stack and of mixed repositories; every placeholder (package manager from the lockfile, scripts present and absent, solution names, wrappers, linters); the six kits scaffolded into temp folders and every file checked; the token budgets; and the never-overwrite rules: an existing `CLAUDE.md`, `--merge` once, skills and agent kept, `settings.json` merged with a backup and without duplicates, invalid JSON left alone, `.gitignore` appended once, dry runs that write nothing, and a second run that changes nothing.
+- **Over 250 automated tests** (`npm test`), all running in throwaway folders under the OS temp folder. The command is run with `HOME`, `USERPROFILE` and `CLAUDE_CONFIG_DIR` pointed at another throwaway folder, and runs inside the test process are given a fake home, so no test reads or writes a real Claude config. They cover detection of each stack and of mixed repositories; every placeholder (package manager from the lockfile, scripts present and absent, solution names, wrappers, linters); the seven kits scaffolded into temp folders and every file checked; the token budgets; and the never-overwrite rules: an existing `CLAUDE.md`, `--merge` once, skills and agent kept, `settings.json` merged with a backup and without duplicates, invalid JSON left alone, `.gitignore` appended once, dry runs that write nothing, and a second run that changes nothing.
 - **Formats.** A small frontmatter checker in the tests reads every generated skill and subagent against the fields Claude Code 2.1.286 reads (`name`, `description`, `argument-hint`, `allowed-tools`, `disable-model-invocation` for skills; `name`, `description`, `tools`, `model` for subagents): every skill is user-only with a description under 60 characters, the agent's description is under 100, and every permission rule has the `Tool(...)` form. Claude Code's own validator agrees on the part it checks: each kit's skills and agent, wrapped in a throwaway plugin, pass `claude plugin validate` (2.1.286, run with a throwaway config folder), which parses their frontmatter as YAML; a deliberately broken copy fails it. That validator does not check what the fields mean.
 - **Token budgets as tests.** Each `CLAUDE.md` is under 250 tokens on the richest sample and on awkward ones, and so is the section `--merge` appends, markers included. The tables above are generated and compared with this README by a test.
 - **Node 18.** The code uses only Node 18 APIs and no dependencies, and a test scans the source for newer ones. The suite also passes on Node 18.20, and CI runs it on Linux with Node 18 as well as on all three systems with Node 20, 22 and 24.

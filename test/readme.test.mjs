@@ -94,7 +94,7 @@ test("README: the agent description length it states is the real one", () => {
 test("README: the publishing commands, rules and secrets it names are in the kits' deny lists", () => {
   const denies = Object.values(SAMPLES).flatMap((s) => renderProject(s.files).kit.settings.permissions.deny);
   for (const rule of ["Read(./.env)", "Read(./.env.*)", "Read(./**/*.pem)", "Read(./secrets/**)", "Bash(git push --force:*)", "Bash(git push -f:*)", "Bash(dotnet nuget push:*)",
-    "Bash(npm publish:*)", "Bash(twine upload:*)", "Bash(goreleaser release:*)", "Bash(flutter pub publish:*)", "Bash(mvn deploy:*)", "Bash(./gradlew publish:*)"]) {
+    "Bash(npm publish:*)", "Bash(twine upload:*)", "Bash(goreleaser release:*)", "Bash(flutter pub publish:*)", "Bash(mvn deploy:*)", "Bash(./gradlew publish:*)", "Bash(cargo publish:*)"]) {
     assert.ok(denies.includes(rule), `${rule} is denied`);
     const bare = rule.replace(/^Bash\(|:\*\)$|\)$/g, "").replace(/^Read\(/, "");
     assert.ok(readme.includes(bare.split(" ").slice(0, 2).join(" ")) || readme.includes(bare), `README mentions ${bare}`);
